@@ -26,15 +26,20 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const scholarshipCollection = client
-      .db("eduScholar")
-      .collection("scholarships");
+    const scholarshipCollection = client.db("eduScholar").collection("scholarships");
+    const usersCollection = client.db("eduScholar").collection("users");
 
-    app.get('/scholarships', async(req, res)=>{
-        const result = await scholarshipCollection.find().toArray();
+    app.get("/scholarships", async (req, res) => {
+      const result = await scholarshipCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.post('/users', async(req, res)=>{
+        const userInfo = req.body;
+        const result = await usersCollection.insertOne(userInfo);
         res.send(result);
     })
-
+    
     app.post("/jwt", async (req, res) => {
       const userEmail = req.body;
       const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
