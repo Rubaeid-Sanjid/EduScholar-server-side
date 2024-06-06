@@ -4,7 +4,7 @@ const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //middleware
 app.use(cors());
@@ -26,7 +26,9 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
 
-    const scholarshipCollection = client.db("eduScholar").collection("scholarships");
+    const scholarshipCollection = client
+      .db("eduScholar")
+      .collection("scholarships");
     const usersCollection = client.db("eduScholar").collection("users");
 
     app.get("/scholarships", async (req, res) => {
@@ -34,12 +36,19 @@ async function run() {
       res.send(result);
     });
 
-    app.post('/users', async(req, res)=>{
-        const userInfo = req.body;
-        const result = await usersCollection.insertOne(userInfo);
-        res.send(result);
-    })
-    
+    app.get("/scholarshipDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await scholarshipCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.post("/users", async (req, res) => {
+      const userInfo = req.body;
+      const result = await usersCollection.insertOne(userInfo);
+      res.send(result);
+    });
+
     app.post("/jwt", async (req, res) => {
       const userEmail = req.body;
       const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
