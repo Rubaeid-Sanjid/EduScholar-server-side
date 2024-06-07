@@ -30,6 +30,7 @@ async function run() {
       .db("eduScholar")
       .collection("scholarships");
     const usersCollection = client.db("eduScholar").collection("users");
+    const reviewsCollection = client.db("eduScholar").collection("reviews");
 
     app.get("/scholarships", async (req, res) => {
       const result = await scholarshipCollection.find().toArray();
@@ -48,6 +49,13 @@ async function run() {
       const result = await usersCollection.insertOne(userInfo);
       res.send(result);
     });
+
+    app.get('/reviews/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {scholarshipId: id}
+      const result = await reviewsCollection.find(query).toArray();
+      res.send(result);
+    })
 
     app.post("/jwt", async (req, res) => {
       const userEmail = req.body;
