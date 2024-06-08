@@ -32,6 +32,7 @@ async function run() {
       .collection("scholarships");
     const usersCollection = client.db("eduScholar").collection("users");
     const reviewsCollection = client.db("eduScholar").collection("reviews");
+    const paymentCollection = client.db("eduScholar").collection("payments");
 
     app.get("/scholarships", async (req, res) => {
       const result = await scholarshipCollection.find().toArray();
@@ -67,7 +68,7 @@ async function run() {
       res.send({ token });
     });
 
-    //payment
+    //payment related api
     app.post('/create-payment-intent', async(req, res)=>{
       const {price} = req.body;
       const amount = parseInt(price * 100)
@@ -82,6 +83,12 @@ async function run() {
         clientSecret: paymentIntent.client_secret
       })
     })
+
+    app.post("/payment", async (req, res) => {
+      const paymentInfo = req.body;
+      const paymentResult = await paymentCollection.insertOne(paymentInfo);
+      res.send(paymentResult);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
