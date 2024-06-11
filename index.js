@@ -52,11 +52,11 @@ async function run() {
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
 
-      const query = {user_email: userInfo.user_email}
+      const query = { user_email: userInfo.user_email };
       const isEmailExist = await usersCollection.findOne(query);
 
-      if(isEmailExist){
-        return res.send({message: "user already exist.", insertedId: null})
+      if (isEmailExist) {
+        return res.send({ message: "user already exist.", insertedId: null });
       }
 
       const result = await usersCollection.insertOne(userInfo);
@@ -65,7 +65,7 @@ async function run() {
 
     app.get("/users/:email", async (req, res) => {
       const email = req.params.email;
-      const query = {user_email: email}
+      const query = { user_email: email };
       const result = await usersCollection.findOne(query);
       res.send(result);
     });
@@ -115,7 +115,14 @@ async function run() {
       );
       res.send(result);
     });
-    
+
+    app.get("/appliedScholarship/:email", async (req, res) => {
+      const appliedEmail = req.params.email;
+      const query = { userEmail: appliedEmail };
+      const result = await appliedScholarshipCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
