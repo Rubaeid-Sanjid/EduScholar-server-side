@@ -42,6 +42,13 @@ async function run() {
       res.send(result);
     });
 
+    // app.get("/scholarships/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = {_id: new ObjectId(id)};
+    //   const result = await scholarshipCollection.findOne(query);
+    //   res.send(result);
+    // });
+
     app.get("/scholarshipDetails/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -112,6 +119,31 @@ async function run() {
       const appliedScholarshipInfo = req.body;
       const result = await appliedScholarshipCollection.insertOne(
         appliedScholarshipInfo
+      );
+      res.send(result);
+    });
+
+    app.patch("/appliedScholarship/:id", async (req, res) => {
+      const selectedScholarshipId = req.params.id;
+      const filter = { _id: new ObjectId(selectedScholarshipId) };
+      const updatedAppliedScholarshipInfo = req.body;
+
+      const updateDoc = {
+        $set: {
+          phone: updatedAppliedScholarshipInfo.phone,
+          photo: updatedAppliedScholarshipInfo.photo,
+          address: updatedAppliedScholarshipInfo.address,
+          gender: updatedAppliedScholarshipInfo.gender,
+          degree: updatedAppliedScholarshipInfo.degree,
+          ssc: updatedAppliedScholarshipInfo.ssc,
+          hsc: updatedAppliedScholarshipInfo.hsc,
+          date: new Date(),
+        },
+      };
+
+      const result = await appliedScholarshipCollection.updateOne(
+        filter,
+        updateDoc
       );
       res.send(result);
     });
