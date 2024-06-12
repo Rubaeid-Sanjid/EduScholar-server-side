@@ -155,6 +155,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/appliedScholarship/:id", async (req, res) => {
+      const appliedScholarshipId = req.params.id;
+      const query = { _id: new ObjectId(appliedScholarshipId) };
+      const result = await appliedScholarshipCollection.deleteOne(query)
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
