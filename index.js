@@ -77,6 +77,12 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/reviews", async (req, res) => {
+      const reviewInfo = req.body;
+      const result = await reviewsCollection.insertOne(reviewInfo);
+      res.send(result);
+    });
+
     app.get("/reviews/:id", async (req, res) => {
       const id = req.params.id;
       const query = { scholarshipId: id };
