@@ -113,6 +113,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/reviews/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reviewsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     app.post("/jwt", async (req, res) => {
       const userEmail = req.body;
       const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
