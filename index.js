@@ -37,6 +37,12 @@ async function run() {
       .db("eduScholar")
       .collection("appliedScholarships");
 
+    app.post("/scholarships", async (req, res) => {
+      const scholarshipInfo = req.body;
+      const result = await scholarshipCollection.insertOne(scholarshipInfo);
+      res.send(result);
+    });
+
     app.get("/scholarships", async (req, res) => {
       const result = await scholarshipCollection.find().toArray();
       res.send(result);
@@ -87,7 +93,7 @@ async function run() {
     app.patch("/reviews/:id", async (req, res) => {
       const selectedReviewId = req.params.id;
       const updatedReviewInfo = req.body;
-      const filter = {_id: new ObjectId(selectedReviewId)}
+      const filter = { _id: new ObjectId(selectedReviewId) };
       const updateDoc = {
         $set: {
           reviewDate: updatedReviewInfo.reviewDate,
@@ -151,6 +157,7 @@ async function run() {
       res.send(paymentResult);
     });
 
+    // applied scholarship related api
     app.post("/appliedScholarship", async (req, res) => {
       const appliedScholarshipInfo = req.body;
       const result = await appliedScholarshipCollection.insertOne(
