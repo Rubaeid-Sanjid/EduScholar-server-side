@@ -214,6 +214,24 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/appliedScholarship/status/:id", async (req, res) => {
+      const selectedScholarshipId = req.params.id;
+      const filter = { _id: new ObjectId(selectedScholarshipId) };
+      const updatedAppliedScholarshipInfo = req.body;
+
+      const updateDoc = {
+        $set: {
+          status: updatedAppliedScholarshipInfo.status,
+        },
+      };
+
+      const result = await appliedScholarshipCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      res.send(result);
+    });
+
     app.get("/appliedScholarship/:email", async (req, res) => {
       const appliedEmail = req.params.email;
       const query = { userEmail: appliedEmail };
