@@ -37,6 +37,7 @@ async function run() {
       .db("eduScholar")
       .collection("appliedScholarships");
 
+      // scholarship related api
     app.post("/scholarships", async (req, res) => {
       const scholarshipInfo = req.body;
       const result = await scholarshipCollection.insertOne(scholarshipInfo);
@@ -81,6 +82,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await scholarshipCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.delete("/scholarships/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await scholarshipCollection.deleteOne(query);
       res.send(result);
     });
 
