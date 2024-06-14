@@ -166,6 +166,11 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/appliedScholarship", async (req, res) => {
+      const result = await appliedScholarshipCollection.find().toArray();
+      res.send(result);
+    });
+
     app.patch("/appliedScholarship/:id", async (req, res) => {
       const selectedScholarshipId = req.params.id;
       const filter = { _id: new ObjectId(selectedScholarshipId) };
