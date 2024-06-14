@@ -43,6 +43,35 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/scholarships/:id", async (req, res) => {
+      const scholarshipId = req.params.id;
+      const updatedScholarshipInfo = req.body;
+
+      const filter = { _id: new ObjectId(scholarshipId) };
+
+      const updateDoc = {
+        $set: {
+          universityName: updatedScholarshipInfo.universityName,
+          universityImage: updatedScholarshipInfo.universityImage,
+          scholarshipName: updatedScholarshipInfo.scholarshipName,
+          scholarshipCategory: updatedScholarshipInfo.scholarshipCategory,
+          universityLocation: { country: updatedScholarshipInfo.country, city: updatedScholarshipInfo.city },
+          universityRank: updatedScholarshipInfo.universityRank,
+          applicationDeadline: updatedScholarshipInfo.applicationDeadline,
+          subjectName: updatedScholarshipInfo.subjectName,
+          scholarshipDescription: updatedScholarshipInfo.scholarshipDescription,
+          degree: updatedScholarshipInfo.degree,
+          stipend: updatedScholarshipInfo.stipend,
+          postDate: updatedScholarshipInfo.postDate,
+          serviceCharge: updatedScholarshipInfo.serviceCharge,
+          applicationFees: updatedScholarshipInfo.applicationFees,
+          rating: parseFloat(updatedScholarshipInfo.rating),
+        },
+      };
+      const result = await scholarshipCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
     app.get("/scholarships", async (req, res) => {
       const result = await scholarshipCollection.find().toArray();
       res.send(result);
