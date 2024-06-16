@@ -154,6 +154,7 @@ async function run() {
       res.send(result);
     });
 
+// user related api
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
 
@@ -170,6 +171,20 @@ async function run() {
 
     app.get("/users", async (req, res) => {
       const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/users/:id", async (req, res) => {
+      const userId = req.params.id;
+      const userRole = req.body;
+
+      const filter = {_id: new ObjectId(userId)};
+      const updateDoc = {
+        $set:{
+          role: userRole.role,
+        }
+      }
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
