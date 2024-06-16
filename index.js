@@ -102,6 +102,37 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/allScholarships", async (req, res) => {
+      try {
+        const page = parseInt(req.query.page) || 1;
+        const size = parseInt(req.query.size) || 10;
+        const search = req.query.search || "";
+    
+        const query = {
+          $or: [
+            { scholarshipName: { $regex: search, $options: "i" } },
+            { universityName: { $regex: search, $options: "i" } },
+            { degree: { $regex: search, $options: "i" } },
+          ],
+        };
+    
+        const totalCount = await scholarshipCollection.countDocuments(query);
+        const scholarships = await scholarshipCollection
+          .find(query)
+          .skip((page - 1) * size)
+          .limit(size)
+          .toArray();
+    
+        res.send({
+          scholarships,
+          count: totalCount,
+        });
+      } catch (error) {
+        console.error("Failed to fetch scholarships:", error);
+        res.status(500).send({ message: "Internal Server Error" });
+      }
+    });
+    
     app.get("/scholarships/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
