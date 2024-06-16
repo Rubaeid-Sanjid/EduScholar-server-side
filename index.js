@@ -37,14 +37,38 @@ async function run() {
       .db("eduScholar")
       .collection("appliedScholarships");
 
+      app.post("/jwt", async (req, res) => {
+        const userEmail = req.body;
+        const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: "1d",
+        });
+  
+        res.send({ token });
+      });
+      
+      //middleware
+    const verifyToken = (req, res, next) => {
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: "unauthorized access" });
+      }
+      const token = req.headers.authorization.split(" ")[1];
+      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.decoded = decoded;
+        next();
+      });
+    };
+
       // scholarship related api
-    app.post("/scholarships", async (req, res) => {
+    app.post("/scholarships", verifyToken, async (req, res) => {
       const scholarshipInfo = req.body;
       const result = await scholarshipCollection.insertOne(scholarshipInfo);
       res.send(result);
     });
 
-    app.patch("/scholarships/:id", async (req, res) => {
+    app.patch("/scholarships/:id", verifyToken, async (req, res) => {
       const scholarshipId = req.params.id;
       const updatedScholarshipInfo = req.body;
 
@@ -127,7 +151,12 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/reviews/:id", async (req, res) => {
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
+      res.send(result);
+    });
+
+    app.patch("/reviews/:id", verifyToken, async (req, res) => {
       const selectedReviewId = req.params.id;
       const updatedReviewInfo = req.body;
       const filter = { _id: new ObjectId(selectedReviewId) };
@@ -161,15 +190,6 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await reviewsCollection.deleteOne(query);
       res.send(result);
-    });
-
-    app.post("/jwt", async (req, res) => {
-      const userEmail = req.body;
-      const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1d",
-      });
-
-      res.send({ token });
     });
 
     //payment related api
