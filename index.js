@@ -140,7 +140,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/scholarships/:id", async (req, res) => {
+    app.delete("/scholarships/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await scholarshipCollection.deleteOne(query);
@@ -174,7 +174,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/users/:id", async (req, res) => {
+    app.patch("/users/:id", verifyToken, async (req, res) => {
       const userId = req.params.id;
       const userRole = req.body;
 
@@ -192,6 +192,13 @@ async function run() {
       const email = req.params.email;
       const query = { user_email: email };
       const result = await usersCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.delete("/users/:id", verifyToken, async (req, res) => {
+      const userId = req.params.id;
+      const query = { _id: new ObjectId(userId) };
+      const result = await usersCollection.deleteOne(query);
       res.send(result);
     });
 
@@ -236,7 +243,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/reviews/:id", async (req, res) => {
+    app.delete("/reviews/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await reviewsCollection.deleteOne(query);
@@ -279,7 +286,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/appliedScholarship/:id", async (req, res) => {
+    app.patch("/appliedScholarship/:id", verifyToken, async (req, res) => {
       const selectedScholarshipId = req.params.id;
       const filter = { _id: new ObjectId(selectedScholarshipId) };
       const updatedAppliedScholarshipInfo = req.body;
@@ -304,7 +311,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/appliedScholarship/feedback/:id", async (req, res) => {
+    app.patch("/appliedScholarship/feedback/:id", verifyToken, async (req, res) => {
       const selectedScholarshipId = req.params.id;
       const filter = { _id: new ObjectId(selectedScholarshipId) };
       const updatedAppliedScholarshipInfo = req.body;
@@ -322,7 +329,7 @@ async function run() {
       res.send(result);
     });
 
-    app.patch("/appliedScholarship/status/:id", async (req, res) => {
+    app.patch("/appliedScholarship/status/:id", verifyToken, async (req, res) => {
       const selectedScholarshipId = req.params.id;
       const filter = { _id: new ObjectId(selectedScholarshipId) };
       const updatedAppliedScholarshipInfo = req.body;
@@ -347,7 +354,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/appliedScholarship/:id", async (req, res) => {
+    app.delete("/appliedScholarship/:id", verifyToken, async (req, res) => {
       const appliedScholarshipId = req.params.id;
       const query = { _id: new ObjectId(appliedScholarshipId) };
       const result = await appliedScholarshipCollection.deleteOne(query);
