@@ -4,19 +4,26 @@ const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
 const jwt = require("jsonwebtoken");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+// const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripeSecret = process.env.STRIPE_SECRET_KEY;
+const stripe = stripeSecret ? require("stripe")(stripeSecret) : null;
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 //middleware
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://eduscholar-434da.web.app"
-  ]
+    "http://localhost:5174",
+    "https://eduscholar-434da.web.app",
+    "https://eduscholar-434da.firebaseapp.com"
+  ],
+  credentials: true
 }));
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.b8fibtq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.b8fibtq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const dbPass = process.env.DB_PASS ? encodeURIComponent(process.env.DB_PASS) : "";
+const uri = `mongodb+srv://${process.env.DB_USER}:${dbPass}@cluster0.b8fibtq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -42,16 +49,16 @@ async function run() {
       .db("eduScholar")
       .collection("appliedScholarships");
 
-      app.post("/jwt", async (req, res) => {
-        const userEmail = req.body;
-        const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: "1d",
-        });
-  
-        res.send({ token });
+    app.post("/jwt", async (req, res) => {
+      const userEmail = req.body;
+      const token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1d",
       });
-      
-      //middleware
+
+      res.send({ token });
+    });
+
+    //middleware
     const verifyToken = (req, res, next) => {
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "unauthorized access" });
@@ -66,7 +73,7 @@ async function run() {
       });
     };
 
-      // scholarship related api
+    // scholarship related api
     app.post("/scholarships", verifyToken, async (req, res) => {
       const scholarshipInfo = req.body;
       const result = await scholarshipCollection.insertOne(scholarshipInfo);
@@ -112,7 +119,7 @@ async function run() {
         const page = parseInt(req.query.page) || 1;
         const size = parseInt(req.query.size) || 10;
         const search = req.query.search || "";
-    
+
         const query = {
           $or: [
             { scholarshipName: { $regex: search, $options: "i" } },
@@ -120,14 +127,14 @@ async function run() {
             { degree: { $regex: search, $options: "i" } },
           ],
         };
-    
+
         const totalCount = await scholarshipCollection.countDocuments(query);
         const scholarships = await scholarshipCollection
           .find(query)
           .skip((page - 1) * size)
           .limit(size)
           .toArray();
-    
+
         res.send({
           scholarships,
           count: totalCount,
@@ -137,7 +144,7 @@ async function run() {
         res.status(500).send({ message: "Internal Server Error" });
       }
     });
-    
+
     app.get("/scholarships/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -159,7 +166,7 @@ async function run() {
       res.send(result);
     });
 
-// user related api
+    // user related api
     app.post("/users", async (req, res) => {
       const userInfo = req.body;
 
@@ -183,9 +190,9 @@ async function run() {
       const userId = req.params.id;
       const userRole = req.body;
 
-      const filter = {_id: new ObjectId(userId)};
+      const filter = { _id: new ObjectId(userId) };
       const updateDoc = {
-        $set:{
+        $set: {
           role: userRole.role,
         }
       }
@@ -259,16 +266,34 @@ async function run() {
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
+      try {
+        if (!stripe) {
+          return res.status(500).send({ message: "Stripe secret key not configured" });
+        }
+        const { price } = req.body;
+        const amount = parseInt(price * 100);
 
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: "usd",
-        payment_method_types: ["card"],
-      });
+        // const paymentIntent = await stripe.paymentIntents.create({
+        //   amount: amount,
+        //   currency: "usd",
+        //   payment_method_types: ["card"],
+        // });
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: amount,
+          currency: "usd",
+          payment_method_types: ["card"],
+        });
 
-      res.send({
-        clientSecret: paymentIntent.client_secret,
-      });
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+        res.send({
+          clientSecret: paymentIntent.client_secret,
+        });
+      } catch (error) {
+        console.error("Create payment intent error:", error);
+        res.status(500).send({ message: error.message });
+      }
     });
 
     app.post("/payment", async (req, res) => {
@@ -383,3 +408,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running at port ${port}`);
 });
+
+module.exports = app;
